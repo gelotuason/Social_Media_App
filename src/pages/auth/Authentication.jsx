@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -11,55 +11,110 @@ import Modal from '@mui/material/Modal';
 import Link from '@mui/material/Link';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import firebaseApp from '../../config/firebaseConfig'
-import FormHelperText from '@mui/material/FormHelperText';
-import Input from '@mui/material/Input';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+import * as Yup from 'yup';
 
 function Authentication() {
 
     const [openModal, setOpenModal] = useState(false);
 
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [date, setDate] = useState(dayjs(new Date()));
+    const [userData, setFormData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        birthDate: date
+    });
+    const [errors, setErrors] = useState({});
 
     const auth = getAuth(firebaseApp);
     const navigate = useNavigate();
 
+    useEffect(() => {
+        // console.log(date)
+    }, [userData]);
+
     const handleOpenModal = () => {
         setOpenModal(true);
-        // setSignupError(false);
-        // setSignupHelperText('');
     }
+
     const handleCloseModal = () => {
         setOpenModal(false);
-        // setSigninError(false);
-        // setSigninHelperText('');
     }
 
-    const handleSignUp = () => {
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                // Signed up 
-                const user = userCredential.user;
-                // ...
-                alert('Registered successfully!');
-                navigate('/home');
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                // ..
-                console.log(errorCode);
-                //auth/email-already-in-use
-                //auth/invalid-email
-                //auth/missing-password
+    const validationSchema = Yup.object({
+        name: Yup.string()
+            .required('Name is required'),
+        email: Yup.string()
+            .required('Email is required')
+            .email('Invalid email format'),
+        password: Yup.string()
+            .required('Password is required')
+            .min(8, 'Password must be at least 8 characters')
+            .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one symbol')
+            .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+            .matches(/[a-z]/, 'Password must contain at least one lowercase letter'),
+        confirmPassword: Yup.string()
+            .oneOf([Yup.ref('password')], 'Passwords must match')
+            .required('Confirm password is required'),
+        birthDate: Yup.date()
+            .required('Birth date is required')
+    })
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        setFormData({
+            ...userData,
+            [name]: value
+        });
+    }
+
+    const handleSignUp = async (e) => {
+        e.preventDefault();
+
+        try {
+            await validationSchema.validate(userData, { abortEarly: false });
+            // console.log('Form Submitted', userData);
+            createUserWithEmailAndPassword(auth, userData.email, userData.password)
+                .then((userCredential) => {
+                    // Signed up 
+                    const user = userCredential.user;
+                    // ...
+                    alert('Registered successfully!');
+                    navigate('/home');
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    // ..
+
+                    if (errorCode == 'auth/email-already-in-use') {
+                        setErrors({
+                            ...errors,
+                            email: 'Email already in use'
+                        })
+                    }
+                });
+
+        } catch (error) {
+            const newErrors = {}
+
+            error.inner.forEach(err => {
+                newErrors[err.path] = err.message
             });
 
+            setErrors(newErrors);
+        }
     }
 
-    const handleSignIn = () => {
-        signInWithEmailAndPassword(auth, email, password)
+    const handleSignIn = (e) => {
+        e.preventDefault();
+
+        try {
+            signInWithEmailAndPassword(auth, userData.email, userData.password)
             .then((userCredential) => {
                 // Signed in 
                 const user = userCredential.user;
@@ -71,11 +126,12 @@ function Authentication() {
                 const errorCode = error.code;
                 const errorMessage = error.message;
 
-                // setSigninError(true);
-                // setSigninHelperText('Incorrect/missing entry.');
+                // if (errorCode == 'auth/missing')
             });
-
-
+        } catch (error) {
+            console.log(error);
+        }
+        
     }
 
     const style = {
@@ -100,68 +156,93 @@ function Authentication() {
                 <Grid item md={6} display="flex" alignItems="center">
                     <Grid item md={12} >
                         <Box>
-                            <Typography variant='h4' marginBottom={'12px'} color='#e0e0e0' sx={{ fontWeight: 'bold', marginBottom: '24px' }}>Join us today.</Typography>
+                            <Typography variant='h4' color='#e0e0e0' sx={{ fontWeight: 'bold', marginBottom: '8px' }}>Join us today.</Typography>
                         </Box>
-                        <Box component='form' noValidate autoComplete='off' sx={{ width: '100%' }}>
-                            <TextField
-                                onChange={(e) => {
-                                    setName(e.target.value);
-                                }}
-                                // error={nameError}
-                                label="Name"
-                                type='text'
-                                fullWidth
-                                sx={{ marginBottom: '6px' }}
-                            />
-                            {/* {
-                                nameError ? <FormHelperText sx={{ marginLeft: '16px', marginBottom: '16px', color: 'red' }}>Incorrect/missing entry.</FormHelperText> : null
-                            } */}
-
-                            <TextField
-                                onChange={(e) => {
-                                    setEmail(e.target.value);
-                                }}
-                                // error={emailError}
-                                // helperText={'Incorrect/missing entry.'}
-                                label="Email"
-                                type='email'
-                                fullWidth
-                                sx={{ marginBottom: '6px' }}
-                            />
-                            <TextField
-                                onChange={(e) => {
-                                    setPassword(e.target.value);
-                                }}
-                                // error={passError}
-                                // helperText={'Incorrect/missing entry.'}
-                                label="Password"
-                                type="password"
-                                fullWidth
-                                sx={{ marginBottom: '6px' }}
-                            />
-                            <TextField
-                                onChange={(e) => {
-                                    setConfirmPassword(e.target.value);
-                                }}
-                                // error={conpassError}
-                                // helperText={'Incorrect/missing entry.'}
-                                label="Confirm Password"
-                                type="password"
-                                fullWidth
-                                sx={{ marginBottom: '6px' }}
-                            />
+                        <Box
+                            onSubmit={handleSignUp}
+                            component='form'
+                            noValidate
+                            autoComplete='off'
+                            sx={{
+                                '& > :not(style)': {
+                                    marginBottom: '12px',
+                                },
+                                width: '100%'
+                            }}
+                        >
+                            <Box>
+                                <TextField
+                                    onChange={handleChange}
+                                    name='name'
+                                    value={userData.name}
+                                    label="Name"
+                                    type='text'
+                                    fullWidth
+                                />
+                                {errors.name && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.name}</Typography>}
+                            </Box>
+                            <Box>
+                                <TextField
+                                    onChange={handleChange}
+                                    name='email'
+                                    value={userData.email}
+                                    label="Email"
+                                    type='email'
+                                    fullWidth
+                                />
+                                {errors.email && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.email}</Typography>}
+                            </Box>
+                            <Box>
+                                <TextField
+                                    onChange={handleChange}
+                                    name='password'
+                                    value={userData.password}
+                                    label="Password"
+                                    type="password"
+                                    fullWidth
+                                />
+                                {errors.password && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.password}</Typography>}
+                            </Box>
+                            <Box>
+                                <TextField
+                                    onChange={handleChange}
+                                    name='confirmPassword'
+                                    value={userData.confirmPassword}
+                                    label="Confirm Password"
+                                    type="password"
+                                    fullWidth
+                                />
+                                {errors.confirmPassword && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.confirmPassword}</Typography>}
+                            </Box>
+                            <Box>
+                                <DatePicker
+                                    onChange={(newValue) => {
+                                        setFormData({
+                                            ...userData,
+                                            birthDate: newValue.format('MM/DD/YYYY')
+                                        });
+                                    }}
+                                    name='birthDate'
+                                    value={date}
+                                    label='Birth Date'
+                                    fullWidth
+                                />
+                                {errors.birthDate && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.birthDate}</Typography>}
+                            </Box>
                             <Button
-                                onClick={handleSignUp}
+                                type='submit'
                                 variant="contained"
                                 color='primary'
-                                sx={{ borderRadius: 6, p: 1, fontWeight: 'bold' }}
+                                sx={{ marginTop: '16px', borderRadius: 6, p: 1, fontWeight: 'bold' }}
                                 fullWidth
                             >
                                 Sign up
                             </Button>
                         </Box>
-                        <Divider sx={{ marginTop: '24px', marginBottom: '24px' }}>or</Divider>
-                        <Typography variant='h6' marginBottom={'12px'} color='#e0e0e0' sx={{ fontWeight: 'bold', marginBottom: '16px' }}>
+
+                        <Divider sx={{ marginTop: '16px', marginBottom: '16px' }}>or</Divider>
+
+                        <Typography variant='h6' color='#e0e0e0' sx={{ fontWeight: 'bold', marginBottom: '16px' }}>
                             Already have an account?
                         </Typography>
                         <Button
@@ -180,38 +261,36 @@ function Authentication() {
                             aria-labelledby="modal-modal-title"
                             aria-describedby="modal-modal-description"
                         >
-                            <Box component='form' autoComplete='off' sx={style}>
+                            <Box onSubmit={handleSignIn} component='form' autoComplete='off' sx={style}>
                                 <Typography id="modal-modal-title" variant="h4" sx={{ fontWeight: 'bold', marginBottom: '24px' }}>
                                     Sign in your account
                                 </Typography>
                                 <TextField
-                                    onChange={(e) => {
-                                        setEmail(e.target.value);
-                                    }}
-                                    value={email}
-                                    // error={signinError}
-                                    // helperText={'Incorrect/missing entry.'}
+                                    onChange={handleChange}
+                                    name='email'
+                                    value={userData.email}
                                     label="Email"
                                     type='email'
                                     fullWidth
                                     sx={{ marginBottom: '16px' }}
                                 />
+                                {errors.email && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.email}</Typography>}
+
                                 <TextField
-                                    onChange={(e) => {
-                                        setPassword(e.target.value);
-                                    }}
-                                    value={password}
-                                    // error={signinError}
-                                    // helperText={'Incorrect/missing entry.'}
+                                    onChange={handleChange}
+                                    name='password'
+                                    value={userData.password}
                                     label="Password"
                                     type="password"
                                     fullWidth
                                     sx={{ marginBottom: '24px' }}
                                 />
+                                {errors.password && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.password}</Typography>}
+
                                 <Button
-                                    onClick={handleSignIn}
                                     variant="contained"
                                     color='primary'
+                                    type='submit'
                                     sx={{ borderRadius: 6, p: 1, fontWeight: 'bold', marginBottom: '24px' }}
                                     fullWidth
                                 >
