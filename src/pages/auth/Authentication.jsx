@@ -20,28 +20,35 @@ function Authentication() {
     const [openModal, setOpenModal] = useState(false);
 
     const [date, setDate] = useState(dayjs(new Date()));
-    const [userData, setFormData] = useState({
+    const [userData, setUserData] = useState({
         name: '',
         email: '',
         password: '',
         confirmPassword: '',
         birthDate: date
     });
+    const [signinData, setSigninData] = useState({
+        email: '',
+        password: ''
+    })
     const [errors, setErrors] = useState({});
+    const [signinErrors, setSigninErrors] = useState({});
 
     const auth = getAuth(firebaseApp);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // console.log(date)
-    }, [userData]);
+
+    }, []);
 
     const handleOpenModal = () => {
         setOpenModal(true);
+        setErrors('');
     }
 
     const handleCloseModal = () => {
         setOpenModal(false);
+        setSigninErrors('');
     }
 
     const validationSchema = Yup.object({
@@ -66,8 +73,17 @@ function Authentication() {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        setFormData({
+        setUserData({
             ...userData,
+            [name]: value
+        });
+    }
+
+    const handleSigninChange = (e) => {
+        const { name, value } = e.target;
+
+        setSigninData({
+            ...signinData,
             [name]: value
         });
     }
@@ -110,28 +126,49 @@ function Authentication() {
         }
     }
 
-    const handleSignIn = (e) => {
+    const handleSignIn = async (e) => {
         e.preventDefault();
 
         try {
-            signInWithEmailAndPassword(auth, userData.email, userData.password)
-            .then((userCredential) => {
-                // Signed in 
-                const user = userCredential.user;
-                // ...
-                navigate('/home');
-                alert('You are signed in!');
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
+            // await validationSchema.validate(signinData, { abortEarly: false });
+            signInWithEmailAndPassword(auth, signinData.email, signinData.password)
+                .then((userCredential) => {
+                    // Signed in 
+                    const user = userCredential.user;
+                    // ...
+                    navigate('/home');
+                    alert('You are signed in!');
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
 
-                // if (errorCode == 'auth/missing')
-            });
+                    if (errorCode == 'auth/invalid-credential') {
+                        setSigninErrors('');
+                        alert('Incorrect email or password');
+                    }
+
+                    if (errorCode == 'auth/missing-password') {
+                        setSigninErrors({
+                            ...signinErrors,
+                            password: 'Invalid password'
+                        })
+                    }
+
+                    if (errorCode == 'auth/invalid-email') {
+                        setSigninErrors({
+                            ...signinErrors,
+                            email: 'Invalid email'
+                        })
+                    }
+
+                    if (errorCode == 'auth/too-many-requests') {
+                        alert('Too many requests. Please try again later.');
+                    }
+                });
         } catch (error) {
             console.log(error);
         }
-        
     }
 
     const style = {
@@ -143,14 +180,24 @@ function Authentication() {
         borderRadius: 4,
         boxShadow: 24,
         p: 4,
+        '& > :not(style)': {
+            marginBottom: '12px',
+        },
     };
 
     return (
         <Container maxWidth='lg'>
             <Grid container spacing={8} minHeight='100vh'>
-                <Grid item md={6} display='flex' justifyContent="center" alignItems="center">
+                <Grid item md={6} display='flex' alignItems="center">
                     <Box>
-                        <Typography variant='h1' sx={{ fontWeight: 'bold' }}>Welcome!</Typography>
+                        <Typography variant='h3' color='#e0e0e0' sx={{ fontWeight: 'bold' }}>Everybody talks.</Typography>
+                        <img
+                            // srcSet={`${item.img}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                            src={'https://images.unsplash.com/photo-1528642474498-1af0c17fd8c3?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}
+                            alt={'People'}
+                            loading="lazy"
+                            style={{ width: '100%', height: 'auto', borderRadius: 6 }}
+                        />
                     </Box>
                 </Grid>
                 <Grid item md={6} display="flex" alignItems="center">
@@ -161,7 +208,6 @@ function Authentication() {
                         <Box
                             onSubmit={handleSignUp}
                             component='form'
-                            noValidate
                             autoComplete='off'
                             sx={{
                                 '& > :not(style)': {
@@ -217,7 +263,7 @@ function Authentication() {
                             <Box>
                                 <DatePicker
                                     onChange={(newValue) => {
-                                        setFormData({
+                                        setUserData({
                                             ...userData,
                                             birthDate: newValue.format('MM/DD/YYYY')
                                         });
@@ -265,33 +311,35 @@ function Authentication() {
                                 <Typography id="modal-modal-title" variant="h4" sx={{ fontWeight: 'bold', marginBottom: '24px' }}>
                                     Sign in your account
                                 </Typography>
-                                <TextField
-                                    onChange={handleChange}
-                                    name='email'
-                                    value={userData.email}
-                                    label="Email"
-                                    type='email'
-                                    fullWidth
-                                    sx={{ marginBottom: '16px' }}
-                                />
-                                {errors.email && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.email}</Typography>}
-
-                                <TextField
-                                    onChange={handleChange}
-                                    name='password'
-                                    value={userData.password}
-                                    label="Password"
-                                    type="password"
-                                    fullWidth
-                                    sx={{ marginBottom: '24px' }}
-                                />
-                                {errors.password && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.password}</Typography>}
-
+                                <Box>
+                                    <TextField
+                                        onChange={handleSigninChange}
+                                        name='email'
+                                        value={signinData.email}
+                                        label="Email"
+                                        type='email'
+                                        fullWidth
+                                    // sx={{ marginBottom: '16px' }}
+                                    />
+                                    {signinErrors.email && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{signinErrors.email}</Typography>}
+                                </Box>
+                                <Box>
+                                    <TextField
+                                        onChange={handleSigninChange}
+                                        name='password'
+                                        value={signinData.password}
+                                        label="Password"
+                                        type="password"
+                                        fullWidth
+                                    // sx={{ marginBottom: '24px' }}
+                                    />
+                                    {signinErrors.password && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{signinErrors.password}</Typography>}
+                                </Box>
                                 <Button
                                     variant="contained"
                                     color='primary'
                                     type='submit'
-                                    sx={{ borderRadius: 6, p: 1, fontWeight: 'bold', marginBottom: '24px' }}
+                                    sx={{ marginTop: '16px', borderRadius: 6, p: 1, fontWeight: 'bold' }}
                                     fullWidth
                                 >
                                     Sign in
@@ -307,7 +355,7 @@ function Authentication() {
                     </Grid>
                 </Grid>
             </Grid>
-        </Container >
+        </Container>
     )
 }
 
