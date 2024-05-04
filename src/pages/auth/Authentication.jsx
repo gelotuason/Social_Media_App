@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import firebaseApp from '../../config/firebaseConfig'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -9,9 +12,6 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Modal from '@mui/material/Modal';
 import Link from '@mui/material/Link';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import firebaseApp from '../../config/firebaseConfig'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import * as Yup from 'yup';
 
@@ -130,7 +130,6 @@ function Authentication() {
         e.preventDefault();
 
         try {
-            // await validationSchema.validate(signinData, { abortEarly: false });
             signInWithEmailAndPassword(auth, signinData.email, signinData.password)
                 .then((userCredential) => {
                     // Signed in 
@@ -192,7 +191,6 @@ function Authentication() {
                     <Box>
                         <Typography variant='h3' color='#e0e0e0' sx={{ fontWeight: 'bold' }}>Everybody talks.</Typography>
                         <img
-                            // srcSet={`${item.img}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                             src={'https://images.unsplash.com/photo-1528642474498-1af0c17fd8c3?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}
                             alt={'People'}
                             loading="lazy"
@@ -319,7 +317,6 @@ function Authentication() {
                                         label="Email"
                                         type='email'
                                         fullWidth
-                                    // sx={{ marginBottom: '16px' }}
                                     />
                                     {signinErrors.email && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{signinErrors.email}</Typography>}
                                 </Box>
@@ -331,7 +328,6 @@ function Authentication() {
                                         label="Password"
                                         type="password"
                                         fullWidth
-                                    // sx={{ marginBottom: '24px' }}
                                     />
                                     {signinErrors.password && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{signinErrors.password}</Typography>}
                                 </Box>
