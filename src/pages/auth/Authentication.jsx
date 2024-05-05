@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import firebaseApp from '../../config/firebaseConfig'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Box from '@mui/material/Box';
@@ -99,6 +99,12 @@ function Authentication() {
                     // Signed up 
                     const user = userCredential.user;
                     // ...
+
+                    updateProfile(auth.currentUser, {
+                        displayName: userData.name, 
+                        // photoURL: "https://example.com/jane-q-user/profile.jpg"
+                    });
+
                     alert('Registered successfully!');
                     navigate('/home');
                 })
@@ -113,6 +119,8 @@ function Authentication() {
                             email: 'Email already in use'
                         })
                     }
+
+                    console.log(error);
                 });
 
         } catch (error) {
@@ -182,26 +190,27 @@ function Authentication() {
         '& > :not(style)': {
             marginBottom: '12px',
         },
+        width: '480px'
     };
 
     return (
         <Container maxWidth='lg'>
-            <Grid container spacing={8} minHeight='100vh'>
-                <Grid item md={6} display='flex' alignItems="center">
-                    <Box>
-                        <Typography variant='h3' color='#e0e0e0' sx={{ fontWeight: 'bold' }}>Everybody talks.</Typography>
+            <Grid container spacing={8} padding={'8px'} minHeight='100vh'>
+                <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Grid sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
+                        <Typography variant='h2' color='primary' sx={{ fontWeight: 'bold', position: 'absolute', marginLeft: '8px' }}>Everybody talks.</Typography>
                         <img
                             src={'https://images.unsplash.com/photo-1528642474498-1af0c17fd8c3?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}
                             alt={'People'}
                             loading="lazy"
-                            style={{ width: '100%', height: 'auto', borderRadius: 6 }}
+                            style={{ minWidth: '445px', maxWidth: '100%', height: 'auto', borderRadius: 6 }}
                         />
-                    </Box>
+                    </Grid>
                 </Grid>
-                <Grid item md={6} display="flex" alignItems="center">
-                    <Grid item md={12} >
+                <Grid item xs={12} md={6} display="flex" alignItems="center">
+                    <Grid item xs={12}>
                         <Box>
-                            <Typography variant='h4' color='#e0e0e0' sx={{ fontWeight: 'bold', marginBottom: '8px' }}>Join us today.</Typography>
+                            <Typography variant='h4' color='primary' sx={{ fontWeight: 'bold', marginBottom: '8px' }}>Join us today.</Typography>
                         </Box>
                         <Box
                             onSubmit={handleSignUp}
@@ -277,7 +286,7 @@ function Authentication() {
                                 type='submit'
                                 variant="contained"
                                 color='primary'
-                                sx={{ marginTop: '16px', borderRadius: 6, p: 1, fontWeight: 'bold' }}
+                                sx={{ marginTop: '4px', borderRadius: 6, p: 1, fontWeight: 'bold' }}
                                 fullWidth
                             >
                                 Sign up
