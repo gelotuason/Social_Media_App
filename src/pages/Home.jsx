@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, addDoc, collection, Timestamp, onSnapshot } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 import firebaseApp from '../config/firebaseConfig'
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -16,8 +17,10 @@ function Home() {
 
     const [userProfile, setUserProfile] = useState({});
     const [body, setBody] = useState('');
+    const [fileUpload, setFileUpload] = useState();
     const [posts, setPosts] = useState([]);
     
+
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
     const navigate = useNavigate();
@@ -41,32 +44,45 @@ function Home() {
         });
 
         onSnapshot(collection(db, "posts"), snapshot => {
-            setPosts(snapshot.docs.map((post) => (
-                post.data()
-            )));
+            setPosts(snapshot.docs.map(post => post.data()));
         });
     }, []);
 
+    const handleUpload = (e) => {
+
+        if (!fileUpload) return;
+        // Create a root reference
+        const storage = getStorage();
+
+        const storageRef = ref(storage, `gelo/images/${fileUpload.name}`);
+
+        uploadBytes(storageRef, fileUpload).then((snapshot) => {
+            console.log('Uploaded a blob or file!');
+        });
+    }
+
     const handleShare = () => {
-        // Post data - avatar, name, date, body
 
         const postData = {
             avatar: 'https://cdn.nba.com/headshots/nba/latest/1040x760/445.png',
             name: userProfile.name,
             body: body,
             files: '',
-            date: '',
+            date_posted: Timestamp.now()
         }
 
         try {
             addDoc(collection(db, "posts"), postData).then(() => {
                 setBody('');
             });
+
+            handleUpload();
         } catch (error) {
             console.log(error);
         }
-        
     }
+
+
 
     return (
         <Container maxWidth='lg'>
@@ -109,12 +125,26 @@ function Home() {
                                         display='flex'
                                         justifyContent='space-between'
                                     >
-                                        <Button size="small" sx={{ marginTop: '8px', width: '100px', fontWeight: 'bold', borderRadius: '24px' }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7e57c2" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-image"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                                                <span style={{ marginLeft: '4px' }}>Files</span>
-                                            </Box>
-                                        </Button>
+                                        <label htmlFor="file">
+                                            <Button component='span' size="small" sx={{ marginTop: '8px', width: '100px', fontWeight: 'bold', borderRadius: '24px' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7e57c2" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-image"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                                    <span style={{ marginLeft: '4px' }}>Files</span>
+                                                    {/* Files */}
+                                                </Box>
+                                            </Button>
+                                        </label>
+                                        <input
+                                            // accept="image/*"
+                                            style={{ display: 'none' }}
+                                            id="file"
+                                            type="file"
+                                            onChange={(e) => {
+                                                setFileUpload(e.target.files[0]);
+                                                // console.log(e.target.files[0]);
+                                            }}
+                                        />
+
                                         <Button disabled={!body} onClick={handleShare} size="small" variant="contained" sx={{ marginTop: '8px', width: '100px', borderRadius: '24px' }}>Share</Button>
                                     </Box>
                                 </Box>
@@ -127,6 +157,7 @@ function Home() {
                                         key={post.id}
                                         name={post.name}
                                         body={post.body}
+                                        date_posted={post.date_posted.toDate().toString()}
                                     >
                                     </Post>
                                 ))

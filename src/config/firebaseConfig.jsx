@@ -8,7 +8,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCQ-OMVSNONtWLKrw5NIS-wTqoIznXR89U",
   authDomain: "socialmediaapp-51c64.firebaseapp.com",
   projectId: "socialmediaapp-51c64",
-  storageBucket: "socialmediaapp-51c64.appspot.com",
+  storageBucket: "gs://socialmediaapp-51c64.appspot.com",
   messagingSenderId: "933469907069",
   appId: "1:933469907069:web:f5c593ba154bb6128fe914"
 };
