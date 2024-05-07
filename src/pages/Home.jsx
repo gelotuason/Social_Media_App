@@ -12,14 +12,15 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Post from './Post';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 function Home() {
 
     const [userProfile, setUserProfile] = useState({});
     const [body, setBody] = useState('');
-    const [fileUpload, setFileUpload] = useState();
+    const [postFile, setPostFile] = useState('');
     const [posts, setPosts] = useState([]);
-    
+    const [loading, setLoading] = useState(false);
 
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
@@ -48,20 +49,40 @@ function Home() {
         });
     }, []);
 
-    const handleUpload = (e) => {
+    const getFileData = (postFile) => {
+        if (postFile.name.includes('png') || postFile.name.includes('jpg') || postFile.name.includes('jpeg')) {
+            const reader = new FileReader();
 
-        if (!fileUpload) return;
-        // Create a root reference
+            reader.onload = () => {
+                document.querySelector('#postFile').src = reader.result;
+            }
+            reader.readAsDataURL(postFile);
+            setPostFile(postFile);
+            // console.log(postFile);
+        } else {
+            alert('Invalid file');
+        }
+    }
+
+    const uploadPostFile = () => {
+        if (!postFile) return;
+
         const storage = getStorage();
 
-        const storageRef = ref(storage, `gelo/images/${fileUpload.name}`);
+        const storageRef = ref(storage, `${userProfile.name}/images/${postFile.name}`);
 
-        uploadBytes(storageRef, fileUpload).then((snapshot) => {
-            console.log('Uploaded a blob or file!');
-        });
+        uploadBytes(storageRef, postFile)
+            .then((snapshot) => {
+                console.log('Uploaded a blob or file!');
+            });
+
+        setPostFile('');
+        document.querySelector('#postFile').src = '';
     }
 
     const handleShare = () => {
+
+        setLoading(true);
 
         const postData = {
             avatar: 'https://cdn.nba.com/headshots/nba/latest/1040x760/445.png',
@@ -76,13 +97,14 @@ function Home() {
                 setBody('');
             });
 
-            handleUpload();
+            uploadPostFile();
+
+            setLoading(false);
         } catch (error) {
+            setLoading(false);
             console.log(error);
         }
     }
-
-
 
     return (
         <Container maxWidth='lg'>
@@ -126,27 +148,27 @@ function Home() {
                                         justifyContent='space-between'
                                     >
                                         <label htmlFor="file">
-                                            <Button component='span' size="small" sx={{ marginTop: '8px', width: '100px', fontWeight: 'bold', borderRadius: '24px' }}>
+                                            <Button component='span' variant="outlined" size="small" sx={{ marginTop: '8px', width: '100px', fontWeight: 'bold', borderRadius: '24px' }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7e57c2" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-image"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                                                    <span style={{ marginLeft: '4px' }}>Files</span>
-                                                    {/* Files */}
+                                                    <span style={{ marginLeft: '4px' }}>Photo</span>
                                                 </Box>
                                             </Button>
+
                                         </label>
+
                                         <input
-                                            // accept="image/*"
+                                            accept="image/*"
                                             style={{ display: 'none' }}
                                             id="file"
                                             type="file"
                                             onChange={(e) => {
-                                                setFileUpload(e.target.files[0]);
-                                                // console.log(e.target.files[0]);
+                                                getFileData(e.target.files[0]);
                                             }}
                                         />
-
-                                        <Button disabled={!body} onClick={handleShare} size="small" variant="contained" sx={{ marginTop: '8px', width: '100px', borderRadius: '24px' }}>Share</Button>
+                                        <LoadingButton disabled={!body && !postFile} loading={loading} onClick={handleShare} size="small" variant="contained" sx={{ marginTop: '8px', width: '100px', borderRadius: '24px' }}>Share</LoadingButton>
                                     </Box>
+                                    <img id="postFile" src="" alt="" loading="lazy" style={{ width: '320px', height: 'auto', marginTop: '8px', borderRadius: '16px' }} />
                                 </Box>
                             </Box>
                         </Box>
