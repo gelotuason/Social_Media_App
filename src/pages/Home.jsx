@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, addDoc, collection, Timestamp, onSnapshot } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getFirestore, addDoc, collection, Timestamp, onSnapshot, orderBy } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import firebaseApp from '../config/firebaseConfig'
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -20,6 +20,7 @@ function Home() {
     const [body, setBody] = useState('');
     const [postFile, setPostFile] = useState('');
     const [posts, setPosts] = useState([]);
+
     const [loading, setLoading] = useState(false);
 
     const auth = getAuth(firebaseApp);
@@ -27,6 +28,7 @@ function Home() {
     const navigate = useNavigate();
 
     useEffect(() => {
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in, see docs for a list of available properties
@@ -44,62 +46,66 @@ function Home() {
             }
         });
 
-        onSnapshot(collection(db, "posts"), snapshot => {
-            setPosts(snapshot.docs.map(post => post.data()));
-        });
+        onSnapshot(collection(db, 'posts'), snapshot => {
+            const newPosts =[];
+
+            snapshot.forEach(post => {
+                newPosts.push(post.data());
+            });
+
+            newPosts.sort((a, b) => b.date_posted - a.date_posted);
+
+            setPosts(newPosts);
+        })
     }, []);
 
-    const getFileData = (postFile) => {
-        if (postFile.name.includes('png') || postFile.name.includes('jpg') || postFile.name.includes('jpeg')) {
+    const getFileData = async (postFile) => {
+        if (
+            postFile.name.includes('png') ||
+            postFile.name.includes('jpg') ||
+            postFile.name.includes('jpeg') ||
+            postFile.name.includes('PNG') ||
+            postFile.name.includes('JPG') ||
+            postFile.name.includes('JPEG')
+        ) {
             const reader = new FileReader();
+
+            reader.readAsDataURL(postFile);
 
             reader.onload = () => {
                 document.querySelector('#postFile').src = reader.result;
             }
-            reader.readAsDataURL(postFile);
-            setPostFile(postFile);
-            // console.log(postFile);
-        } else {
-            alert('Invalid file');
         }
     }
 
-    const uploadPostFile = () => {
-        if (!postFile) return;
-
-        const storage = getStorage();
-
-        const storageRef = ref(storage, `${userProfile.name}/images/${postFile.name}`);
-
-        uploadBytes(storageRef, postFile)
-            .then((snapshot) => {
-                console.log('Uploaded a blob or file!');
-            });
-
-        setPostFile('');
-        document.querySelector('#postFile').src = '';
-    }
-
-    const handleShare = () => {
-
+    const handleShare = async () => {
         setLoading(true);
 
         const postData = {
             avatar: 'https://cdn.nba.com/headshots/nba/latest/1040x760/445.png',
             name: userProfile.name,
             body: body,
-            files: '',
+            file: '',
             date_posted: Timestamp.now()
         }
+
+        // Uploading file to storage
+        const storage = getStorage();
+        const storageRef = ref(storage, `${userProfile.name}/images/${postFile.name}`);
+        const snapshot = await uploadBytes(storageRef, postFile);
+        const url = await getDownloadURL(snapshot.ref);
+        postData.file = url;
 
         try {
             addDoc(collection(db, "posts"), postData).then(() => {
                 setBody('');
+                postData.file = '';
+                setPostFile('');
+                document.querySelector('#postFile').src = '';
             });
 
-            uploadPostFile();
-
             setLoading(false);
+
         } catch (error) {
             setLoading(false);
             console.log(error);
@@ -130,9 +136,7 @@ function Home() {
                                 <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '24px', width: '100%' }}>
                                     <TextField
                                         onChange={(e) => {
-                                            setBody(
-                                                e.target.value
-                                            )
+                                            setBody(e.target.value);
                                         }}
                                         value={body}
                                         multiline
@@ -164,6 +168,7 @@ function Home() {
                                             type="file"
                                             onChange={(e) => {
                                                 getFileData(e.target.files[0]);
+                                                setPostFile(e.target.files[0]);
                                             }}
                                         />
                                         <LoadingButton disabled={!body && !postFile} loading={loading} onClick={handleShare} size="small" variant="contained" sx={{ marginTop: '8px', width: '100px', borderRadius: '24px' }}>Share</LoadingButton>
@@ -180,6 +185,7 @@ function Home() {
                                         name={post.name}
                                         body={post.body}
                                         date_posted={post.date_posted.toDate().toString()}
+                                        file={post.file}
                                     >
                                     </Post>
                                 ))
