@@ -93,7 +93,6 @@ function Authentication() {
 
         try {
             await validationSchema.validate(userData, { abortEarly: false });
-            // console.log('Form Submitted', userData);
             createUserWithEmailAndPassword(auth, userData.email, userData.password)
                 .then((userCredential) => {
                     // Signed up 
@@ -101,12 +100,19 @@ function Authentication() {
                     // ...
 
                     updateProfile(auth.currentUser, {
-                        displayName: userData.name, 
-                        // photoURL: "https://example.com/jane-q-user/profile.jpg"
+                        displayName: userData.name,
                     });
 
                     alert('Registered successfully!');
-                    navigate('/home');
+                    setUserData({
+                        name: '',
+                        email: '',
+                        password: '',
+                        confirmPassword: '',
+                        birthDate: date
+                    });
+
+                    handleOpenModal();
                 })
                 .catch((error) => {
                     const errorCode = error.code;

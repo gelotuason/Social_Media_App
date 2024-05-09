@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, addDoc, collection, Timestamp, onSnapshot, orderBy } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getFirestore, addDoc, collection, Timestamp, onSnapshot } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import firebaseApp from '../config/firebaseConfig'
 import Box from '@mui/material/Box';
@@ -28,7 +28,6 @@ function Home() {
     const navigate = useNavigate();
 
     useEffect(() => {
-
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in, see docs for a list of available properties
@@ -47,7 +46,7 @@ function Home() {
         });
 
         onSnapshot(collection(db, 'posts'), snapshot => {
-            const newPosts =[];
+            const newPosts = [];
 
             snapshot.forEach(post => {
                 newPosts.push(post.data());
@@ -112,6 +111,13 @@ function Home() {
         }
     }
 
+    const handleLogout = () => {
+        signOut(auth).then(() => {
+            // Sign-out successful.
+            navigate('/');
+        })
+    }
+
     return (
         <Container maxWidth='lg'>
             <Box sx={{ p: '8px' }}>
@@ -124,8 +130,14 @@ function Home() {
                                 <Typography variant='subtitle2'>{userProfile.email}</Typography>
                             </Box>
                         </Grid>
-                        <Button variant="contained" color='primary' sx={{ borderRadius: 6, p: 1, fontWeight: 'bold', marginTop: '16px', minWidth: '236px' }}>
-                            POST
+                        <Button
+                            onClick={handleLogout}
+                            variant="outlined"
+                            color='primary'
+                            size="small"
+                            sx={{ borderRadius: 6, p: 1, fontWeight: 'bold', marginTop: '16px', minWidth: '236px' }}
+                        >
+                            Logout
                         </Button>
 
                     </Grid>
