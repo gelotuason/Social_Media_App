@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Modal from '@mui/material/Modal';
 import Link from '@mui/material/Link';
+import LoadingButton from '@mui/lab/LoadingButton';
 import dayjs from 'dayjs';
 import * as Yup from 'yup';
 
@@ -33,6 +34,8 @@ function Authentication() {
     })
     const [errors, setErrors] = useState({});
     const [signinErrors, setSigninErrors] = useState({});
+
+    const [loading, setLoading] = useState(false);
 
     const auth = getAuth(firebaseApp);
     const navigate = useNavigate();
@@ -90,6 +93,7 @@ function Authentication() {
 
     const handleSignUp = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         try {
             await validationSchema.validate(userData, { abortEarly: false });
@@ -103,7 +107,6 @@ function Authentication() {
                         displayName: userData.name,
                     });
 
-                    alert('Registered successfully!');
                     setUserData({
                         name: '',
                         email: '',
@@ -111,6 +114,10 @@ function Authentication() {
                         confirmPassword: '',
                         birthDate: date
                     });
+
+                    alert('Registered successfully!');
+                    
+                    setLoading(false);
 
                     handleOpenModal();
                 })
@@ -126,7 +133,7 @@ function Authentication() {
                         })
                     }
 
-                    console.log(error);
+                    setLoading(false);
                 });
 
         } catch (error) {
@@ -137,11 +144,13 @@ function Authentication() {
             });
 
             setErrors(newErrors);
+            setLoading(false);
         }
     }
 
     const handleSignIn = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         try {
             signInWithEmailAndPassword(auth, signinData.email, signinData.password)
@@ -149,6 +158,7 @@ function Authentication() {
                     // Signed in 
                     const user = userCredential.user;
                     // ...
+                    setLoading(false);
                     navigate('/home');
                     alert('You are signed in!');
                 })
@@ -178,9 +188,10 @@ function Authentication() {
                     if (errorCode == 'auth/too-many-requests') {
                         alert('Too many requests. Please try again later.');
                     }
+                    setLoading(false);
                 });
         } catch (error) {
-            console.log(error);
+            setLoading(false);
         }
     }
 
@@ -288,7 +299,8 @@ function Authentication() {
                                 />
                                 {errors.birthDate && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{errors.birthDate}</Typography>}
                             </Box>
-                            <Button
+                            <LoadingButton
+                                loading={loading}
                                 type='submit'
                                 variant="contained"
                                 color='primary'
@@ -296,7 +308,7 @@ function Authentication() {
                                 fullWidth
                             >
                                 Sign up
-                            </Button>
+                            </LoadingButton>
                         </Box>
 
                         <Divider sx={{ marginTop: '16px', marginBottom: '16px' }}>or</Divider>
@@ -346,7 +358,8 @@ function Authentication() {
                                     />
                                     {signinErrors.password && <Typography variant='subtitle2' sx={{ marginLeft: '8px', marginBottom: '12px', color: 'red' }}>{signinErrors.password}</Typography>}
                                 </Box>
-                                <Button
+                                <LoadingButton
+                                    loading={loading}
                                     variant="contained"
                                     color='primary'
                                     type='submit'
@@ -354,7 +367,7 @@ function Authentication() {
                                     fullWidth
                                 >
                                     Sign in
-                                </Button>
+                                </LoadingButton>
                                 <Typography variant="subtitle2" sx={{ fontWeight: 'light' }}>
                                     Don't have an account?
                                     <Link marginLeft='4px' onClick={handleCloseModal} underline="hover" color='inherit' sx={{ fontWeight: 'bold' }}>

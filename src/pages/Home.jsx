@@ -23,6 +23,14 @@ function Home() {
 
     const [loading, setLoading] = useState(false);
 
+    const postData = {
+        avatar: 'https://images.unsplash.com/photo-1534294668821-28a3054f4256?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        name: userProfile.name,
+        body: body,
+        file: '',
+        date_posted: Timestamp.now()
+    }
+
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
     const navigate = useNavigate();
@@ -80,14 +88,6 @@ function Home() {
     const handleShare = async () => {
         setLoading(true);
 
-        const postData = {
-            avatar: 'https://cdn.nba.com/headshots/nba/latest/1040x760/445.png',
-            name: userProfile.name,
-            body: body,
-            file: '',
-            date_posted: Timestamp.now()
-        }
-
         // Uploading file to storage
         const storage = getStorage();
         const storageRef = ref(storage, `${userProfile.name}/images/${postFile.name}`);
@@ -112,8 +112,10 @@ function Home() {
     }
 
     const handleLogout = () => {
+        setLoading(true);
         signOut(auth).then(() => {
             // Sign-out successful.
+            setLoading(false);
             navigate('/');
         })
     }
@@ -124,13 +126,14 @@ function Home() {
                 <Grid container>
                     <Grid item xs={12} padding={'16px'}>
                         <Grid item xs={12} sx={{ display: 'flex' }}>
-                            <Avatar src='https://cdn.nba.com/headshots/nba/latest/1040x760/445.png' />
+                            <Avatar sx={{ alignSelf: 'center' }} src={postData.avatar} />
                             <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '16px' }}>
                                 <Typography variant='subtitle1'>{userProfile.name}</Typography>
                                 <Typography variant='subtitle2'>{userProfile.email}</Typography>
                             </Box>
                         </Grid>
-                        <Button
+                        <LoadingButton
+                            loading={loading}
                             onClick={handleLogout}
                             variant="outlined"
                             color='primary'
@@ -138,13 +141,13 @@ function Home() {
                             sx={{ borderRadius: 6, p: 1, fontWeight: 'bold', marginTop: '16px', minWidth: '236px' }}
                         >
                             Logout
-                        </Button>
+                        </LoadingButton>
 
                     </Grid>
                     <Grid item xs={12} md={9} padding={'16px'}>
                         <Box sx={{ backgroundColor: '#181818', marginBottom: '16px', borderRadius: 2, p: 2 }}>
                             <Box sx={{ display: 'flex' }}>
-                                <Avatar sx={{ marginTop: '8px' }} src='https://cdn.nba.com/headshots/nba/latest/1040x760/445.png' />
+                                <Avatar sx={{ marginTop: '8px' }} src={postData.avatar} />
                                 <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '24px', width: '100%' }}>
                                     <TextField
                                         onChange={(e) => {
@@ -170,7 +173,6 @@ function Home() {
                                                     <span style={{ marginLeft: '4px' }}>Photo</span>
                                                 </Box>
                                             </Button>
-
                                         </label>
 
                                         <input
@@ -183,7 +185,16 @@ function Home() {
                                                 setPostFile(e.target.files[0]);
                                             }}
                                         />
-                                        <LoadingButton disabled={!body && !postFile} loading={loading} onClick={handleShare} size="small" variant="contained" sx={{ marginTop: '8px', width: '100px', borderRadius: '24px' }}>Share</LoadingButton>
+                                        <LoadingButton
+                                            disabled={!body && !postFile}
+                                            loading={loading}
+                                            onClick={handleShare}
+                                            size="small"
+                                            variant="contained"
+                                            sx={{ marginTop: '8px', width: '100px', borderRadius: '24px' }}
+                                        >
+                                            Share
+                                        </LoadingButton>
                                     </Box>
                                     <img id="postFile" src="" alt="" loading="lazy" style={{ width: '320px', height: 'auto', marginTop: '8px', borderRadius: '16px' }} />
                                 </Box>
@@ -194,6 +205,7 @@ function Home() {
                                 posts.map((post) => (
                                     <Post
                                         key={post.id}
+                                        avatar={post.avatar}
                                         name={post.name}
                                         body={post.body}
                                         date_posted={post.date_posted.toDate().toString()}
