@@ -19,7 +19,7 @@ function Home() {
 
     const [userProfile, setUserProfile] = useState({});
     const [body, setBody] = useState('');
-    const [postFile, setPostFile] = useState('');
+    const [postFile, setPostFile] = useState({});
     const [posts, setPosts] = useState([]);
 
     const [loading, setLoading] = useState(false);
@@ -67,7 +67,7 @@ function Home() {
 
             setPosts(newPosts);
         })
-    }, [userProfile, posts]);
+    }, []);
 
     const previewFile = async (file) => {
         if (
@@ -100,31 +100,23 @@ function Home() {
         });
     }
 
-    const handlePostFile = async () => {
-        if (!postFile) {
-            return;
-        } else {
-            // Uploading file to storage
-            const storageRef = ref(storage, `${userProfile.name}/images/${postFile.name}`);
-            const snapshot = await uploadBytes(storageRef, postFile);
-
-            const url = await getDownloadURL(snapshot.ref);
-
-            postData.file = url;
-        }
-    }
-
     const handleShare = async () => {
         setLoading(true);
 
-        handlePostFile();
+        // handle files
+        const storageRef = ref(storage, `${userProfile.name}/images/${postFile.name}`);
+        const snapshot = await uploadBytes(storageRef, postFile);
 
+        const url = await getDownloadURL(snapshot.ref);
+
+        postData.file = url;
+
+        // add post
         try {
             addDoc(collection(db, "posts"), postData)
                 .then(() => {
                     setBody('');
                     postData.file = '';
-                    setPostFile('');
                     document.querySelector('#postFile').src = '';
                 });
 
@@ -177,7 +169,7 @@ function Home() {
                     <Grid item xs={12} md={9} padding={'16px'}>
                         <Box sx={{ backgroundColor: '#181818', marginBottom: '16px', borderRadius: 2, p: 2 }}>
                             <Box sx={{ display: 'flex' }}>
-                                <Avatar sx={{ marginTop: '8px' }} src={postData.avatar} />
+                                <Avatar sx={{ marginTop: '8px' }} src={userProfile.photo} />
                                 <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '24px', width: '100%' }}>
                                     <TextField
                                         onChange={(e) => {
