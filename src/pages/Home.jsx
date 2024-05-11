@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
 import { getFirestore, addDoc, collection, Timestamp, onSnapshot } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import firebaseApp from '../config/firebaseConfig'
@@ -13,6 +13,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Post from './Post';
 import LoadingButton from '@mui/lab/LoadingButton';
+import MenuButton from "./components/MenuButton";
 
 function Home() {
 
@@ -24,7 +25,7 @@ function Home() {
     const [loading, setLoading] = useState(false);
 
     const postData = {
-        avatar: 'https://images.unsplash.com/photo-1534294668821-28a3054f4256?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        avatar: userProfile.photo,
         name: userProfile.name,
         body: body,
         file: '',
@@ -34,6 +35,7 @@ function Home() {
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
     const navigate = useNavigate();
+    const storage = getStorage();
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -44,7 +46,8 @@ function Home() {
                 // ...
                 setUserProfile({
                     name: user.displayName,
-                    email: user.email
+                    email: user.email,
+                    photo: user.photoURL
                 });
             } else {
                 // User is signed out
@@ -64,20 +67,20 @@ function Home() {
 
             setPosts(newPosts);
         })
-    }, []);
+    }, [userProfile, posts]);
 
-    const getFileData = async (postFile) => {
+    const previewFile = async (file) => {
         if (
-            postFile.name.includes('png') ||
-            postFile.name.includes('jpg') ||
-            postFile.name.includes('jpeg') ||
-            postFile.name.includes('PNG') ||
-            postFile.name.includes('JPG') ||
-            postFile.name.includes('JPEG')
+            file.name.includes('png') ||
+            file.name.includes('jpg') ||
+            file.name.includes('jpeg') ||
+            file.name.includes('PNG') ||
+            file.name.includes('JPG') ||
+            file.name.includes('JPEG')
         ) {
             const reader = new FileReader();
 
-            reader.readAsDataURL(postFile);
+            reader.readAsDataURL(file);
 
             reader.onload = () => {
                 document.querySelector('#postFile').src = reader.result;
@@ -85,23 +88,45 @@ function Home() {
         }
     }
 
+    const handleProfilePic = async (file) => {
+        // Uploading file to storage
+        const storageRef = ref(storage, `${userProfile.name}/profilePic/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+
+        const url = await getDownloadURL(snapshot.ref);
+
+        updateProfile(auth.currentUser, {
+            photoURL: url
+        });
+    }
+
+    const handlePostFile = async () => {
+        if (!postFile) {
+            return;
+        } else {
+            // Uploading file to storage
+            const storageRef = ref(storage, `${userProfile.name}/images/${postFile.name}`);
+            const snapshot = await uploadBytes(storageRef, postFile);
+
+            const url = await getDownloadURL(snapshot.ref);
+
+            postData.file = url;
+        }
+    }
+
     const handleShare = async () => {
         setLoading(true);
 
-        // Uploading file to storage
-        const storage = getStorage();
-        const storageRef = ref(storage, `${userProfile.name}/images/${postFile.name}`);
-        const snapshot = await uploadBytes(storageRef, postFile);
-        const url = await getDownloadURL(snapshot.ref);
-        postData.file = url;
+        handlePostFile();
 
         try {
-            addDoc(collection(db, "posts"), postData).then(() => {
-                setBody('');
-                postData.file = '';
-                setPostFile('');
-                document.querySelector('#postFile').src = '';
-            });
+            addDoc(collection(db, "posts"), postData)
+                .then(() => {
+                    setBody('');
+                    postData.file = '';
+                    setPostFile('');
+                    document.querySelector('#postFile').src = '';
+                });
 
             setLoading(false);
 
@@ -126,7 +151,7 @@ function Home() {
                 <Grid container>
                     <Grid item xs={12} padding={'16px'}>
                         <Grid item xs={12} sx={{ display: 'flex' }}>
-                            <Avatar sx={{ alignSelf: 'center' }} src={postData.avatar} />
+                            <Avatar sx={{ alignSelf: 'center' }} src={userProfile.photo} />
                             <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '16px' }}>
                                 <Typography variant='subtitle1'>{userProfile.name}</Typography>
                                 <Typography variant='subtitle2'>{userProfile.email}</Typography>
@@ -135,13 +160,18 @@ function Home() {
                         <LoadingButton
                             loading={loading}
                             onClick={handleLogout}
-                            variant="outlined"
-                            color='primary'
+                            variant="contained"
+                            color='secondary'
                             size="small"
-                            sx={{ borderRadius: 6, p: 1, fontWeight: 'bold', marginTop: '16px', minWidth: '236px' }}
+                            sx={{ borderRadius: 4, fontWeight: 'bold', marginTop: '16px', minWidth: '100px' }}
                         >
-                            Logout
+                            Menu
                         </LoadingButton>
+
+                        <MenuButton
+                            logout={handleLogout}
+                            handleProfilePic={handleProfilePic}
+                        />
 
                     </Grid>
                     <Grid item xs={12} md={9} padding={'16px'}>
@@ -181,7 +211,7 @@ function Home() {
                                             id="file"
                                             type="file"
                                             onChange={(e) => {
-                                                getFileData(e.target.files[0]);
+                                                previewFile(e.target.files[0]);
                                                 setPostFile(e.target.files[0]);
                                             }}
                                         />

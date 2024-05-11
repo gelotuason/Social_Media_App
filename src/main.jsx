@@ -15,6 +15,9 @@ const darkTheme = createTheme({
     primary: {
       main: deepPurple[400],
     },
+    secondary: {
+      main: deepPurple[300],
+    },
   },
 });
 

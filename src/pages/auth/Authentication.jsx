@@ -102,7 +102,6 @@ function Authentication() {
                     // Signed up 
                     const user = userCredential.user;
                     // ...
-
                     updateProfile(auth.currentUser, {
                         displayName: userData.name,
                     });
@@ -215,7 +214,7 @@ function Authentication() {
             <Grid container spacing={8} padding={'8px'} minHeight='100vh'>
                 <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Grid sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-                        <Typography variant='h2' color='primary' sx={{ fontWeight: 'bold', position: 'absolute', marginLeft: '8px' }}>Everybody talks.</Typography>
+                        <Typography variant='h2' color='secondary' sx={{ fontWeight: 'bold', position: 'absolute', marginLeft: '8px' }}>Everybody talks.</Typography>
                         <img
                             src={'https://images.unsplash.com/photo-1528642474498-1af0c17fd8c3?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}
                             alt={'People'}
