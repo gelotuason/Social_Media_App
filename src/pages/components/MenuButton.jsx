@@ -24,7 +24,7 @@ function MenuButton({ logout, handleProfilePic }) {
                 aria-haspopup="true"
                 aria-expanded={open ? 'true' : undefined}
                 onClick={handleClick}
-                sx={{ borderRadius: 4, fontWeight: 'bold', marginTop: '16px', minWidth: '100px' }}
+                sx={{ borderRadius: 4, fontWeight: 'bold', width: '70px' }}
             >
                 Menu
             </Button>

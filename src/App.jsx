@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './pages/Layout';
 import Home from './pages/Home';
 import Authentication from './pages/auth/Authentication';
-import './styles.css';
 
 function App() {
 

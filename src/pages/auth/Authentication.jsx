@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import firebaseApp from '../../config/firebaseConfig'
@@ -8,7 +8,6 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Modal from '@mui/material/Modal';
 import Link from '@mui/material/Link';
@@ -39,10 +38,6 @@ function Authentication() {
 
     const auth = getAuth(firebaseApp);
     const navigate = useNavigate();
-
-    useEffect(() => {
-
-    }, []);
 
     const handleOpenModal = () => {
         setOpenModal(true);
@@ -102,9 +97,10 @@ function Authentication() {
                     // Signed up 
                     const user = userCredential.user;
                     // ...
+                    console.log(user.photoURL);
                     updateProfile(auth.currentUser, {
                         displayName: userData.name,
-                    });
+                    })
 
                     setUserData({
                         name: '',
@@ -115,7 +111,7 @@ function Authentication() {
                     });
 
                     alert('Registered successfully!');
-                    
+
                     setLoading(false);
 
                     handleOpenModal();
@@ -214,7 +210,7 @@ function Authentication() {
             <Grid container spacing={8} padding={'8px'} minHeight='100vh'>
                 <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Grid sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-                        <Typography variant='h2' color='secondary' sx={{ fontWeight: 'bold', position: 'absolute', marginLeft: '8px' }}>Everybody talks.</Typography>
+                        <Typography variant='h2' color='secondary' sx={{ position: 'absolute', marginLeft: '8px' }}><span style={{ color: '#f5f5f5' }}>Everybody</span> <strong>TALKS.</strong></Typography>
                         <img
                             src={'https://images.unsplash.com/photo-1528642474498-1af0c17fd8c3?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}
                             alt={'People'}
@@ -315,7 +311,8 @@ function Authentication() {
                         <Typography variant='h6' color='#e0e0e0' sx={{ fontWeight: 'bold', marginBottom: '16px' }}>
                             Already have an account?
                         </Typography>
-                        <Button
+                        <LoadingButton
+                            loading={loading}
                             onClick={handleOpenModal}
                             variant="outlined"
                             color='primary'
@@ -323,7 +320,7 @@ function Authentication() {
                             fullWidth
                         >
                             Sign in
-                        </Button>
+                        </LoadingButton>
 
                         <Modal
                             open={openModal}

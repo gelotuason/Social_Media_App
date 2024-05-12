@@ -7,10 +7,10 @@ import Avatar from '@mui/material/Avatar';
 function Post({ avatar, name, body, date_posted, file }) {
 
     return (
-        <Card sx={{ width: '100%' }}>
+        <Card sx={{ width: '100%', boxShadow: 4 }}>
             <CardContent>
                 <Box sx={{ display: 'flex' }}>
-                    <Avatar src={avatar} />
+                    <Avatar sx={{ alignSelf: 'center' }} src={avatar} />
                     <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '24px', width: '100%' }}>
                         <Typography variant="subtitle1">{name}</Typography>
                         <Typography variant="caption" color='grey'>{date_posted}</Typography>
@@ -20,7 +20,7 @@ function Post({ avatar, name, body, date_posted, file }) {
                     <Typography variant="caption">{body}
                     </Typography>
                 </Box>
-                <img src={file} alt="" style={{ width: '100%', borderRadius: 2 }} />
+                <img src={file} alt="" style={{ width: '100%', borderRadius: 6 }} />
             </CardContent>
         </Card>
     )

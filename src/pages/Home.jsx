@@ -14,6 +14,10 @@ import TextField from '@mui/material/TextField';
 import Post from './Post';
 import LoadingButton from '@mui/lab/LoadingButton';
 import MenuButton from "./components/MenuButton";
+import Link from '@mui/material/Link';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLinkedinIn, faGithub } from '@fortawesome/free-brands-svg-icons';
+import { faEnvelope } from '@fortawesome/free-regular-svg-icons';
 
 function Home() {
 
@@ -117,6 +121,7 @@ function Home() {
                 .then(() => {
                     setBody('');
                     postData.file = '';
+                    setPostFile('');
                     document.querySelector('#postFile').src = '';
                 });
 
@@ -124,7 +129,6 @@ function Home() {
 
         } catch (error) {
             setLoading(false);
-            console.log(error);
         }
     }
 
@@ -142,35 +146,32 @@ function Home() {
             <Box sx={{ p: '8px' }}>
                 <Grid container>
                     <Grid item xs={12} padding={'16px'}>
-                        <Grid item xs={12} sx={{ display: 'flex' }}>
-                            <Avatar sx={{ alignSelf: 'center' }} src={userProfile.photo} />
-                            <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '16px' }}>
-                                <Typography variant='subtitle1'>{userProfile.name}</Typography>
-                                <Typography variant='subtitle2'>{userProfile.email}</Typography>
+                        <Grid item>
+                            <Box sx={{ boxShadow: 2, p: '8px 16px', borderRadius: 4, border: '1px solid #000000', width: '100%' }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Avatar sx={{ alignSelf: 'center' }} src={userProfile.photo} />
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '16px' }}>
+                                            <Typography variant='subtitle1'>{userProfile.name}</Typography>
+                                            <Typography variant='subtitle2'>{userProfile.email}</Typography>
+                                        </Box>
+                                    </Box>
+                                    <Box sx={{ alignSelf: 'center', p: '12px' }}>
+                                        <MenuButton
+                                            logout={handleLogout}
+                                            handleProfilePic={handleProfilePic}
+                                        />
+                                    </Box>
+                                </Box>
                             </Box>
                         </Grid>
-                        <LoadingButton
-                            loading={loading}
-                            onClick={handleLogout}
-                            variant="contained"
-                            color='secondary'
-                            size="small"
-                            sx={{ borderRadius: 4, fontWeight: 'bold', marginTop: '16px', minWidth: '100px' }}
-                        >
-                            Menu
-                        </LoadingButton>
-
-                        <MenuButton
-                            logout={handleLogout}
-                            handleProfilePic={handleProfilePic}
-                        />
 
                     </Grid>
                     <Grid item xs={12} md={9} padding={'16px'}>
-                        <Box sx={{ backgroundColor: '#181818', marginBottom: '16px', borderRadius: 2, p: 2 }}>
+                        <Box sx={{ backgroundColor: '#181818', marginBottom: '16px', borderRadius: 2, p: 2, boxShadow: 6 }}>
                             <Box sx={{ display: 'flex' }}>
                                 <Avatar sx={{ marginTop: '8px' }} src={userProfile.photo} />
-                                <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '24px', width: '100%' }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '24px', minWidth: '261px', width: '100%' }}>
                                     <TextField
                                         onChange={(e) => {
                                             setBody(e.target.value);
@@ -222,7 +223,7 @@ function Home() {
                                 </Box>
                             </Box>
                         </Box>
-                        <Grid container sx={{ backgroundColor: '#181818', borderRadius: 2, p: 2, gap: 1 }}>
+                        <Grid container sx={{ backgroundColor: '#181818', borderRadius: 2, p: 2, gap: 1, boxShadow: 6 }}>
                             {
                                 posts.map((post) => (
                                     <Post
@@ -239,8 +240,23 @@ function Home() {
                         </Grid>
                     </Grid>
                     <Grid item xs padding={'16px'}>
-                        <Box sx={{ backgroundColor: '#181818', borderRadius: 2, p: 2 }}>
-                            <Typography variant='h5'>Follow other users</Typography>
+                        <Box>
+                            <Typography color='#bdbdbd' variant='subtitle2'>Developed by Ferangelo Tuason</Typography>
+                            <Typography color='#bdbdbd' variant='caption'>© 2024 <strong>Talks.</strong></Typography>
+
+                            <Box gap={1} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <Link href="https://www.linkedin.com/in/ferangelo-tuason/" target="_blank">
+                                    <FontAwesomeIcon icon={faLinkedinIn} />
+                                </Link>
+
+                                <Link href="https://github.com/gelotuason" target="_blank">
+                                    <FontAwesomeIcon icon={faGithub} />
+                                </Link>
+
+                                <Link href="mailto:gelotuason@gmail.com" target="_blank">
+                                    <FontAwesomeIcon icon={faEnvelope} />
+                                </Link>
+                            </Box>
                         </Box>
                     </Grid>
                 </Grid>
