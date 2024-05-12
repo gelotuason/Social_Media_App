@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.FIREBASE_API_KEY,
+  apiKey: import.meta.env.FIREBASE_API_KEY || 'mock_key',
   authDomain: import.meta.env.FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.FIREBASE_STORAGE_BUCKET,
