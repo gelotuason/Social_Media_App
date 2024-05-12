@@ -11,6 +11,7 @@ function App() {
           <Route path='/' element={<Layout />}>
             <Route index element={<Authentication />} />
             <Route path='home' element={<Home />} />
+            <Route path='*' element={<Authentication />} />
           </Route>
         </Routes>
       </BrowserRouter>
