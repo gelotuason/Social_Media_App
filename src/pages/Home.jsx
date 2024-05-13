@@ -42,6 +42,9 @@ function Home() {
     const storage = getStorage();
 
     useEffect(() => {
+
+        setPostFile('');
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is signed in, see docs for a list of available properties
@@ -169,59 +172,67 @@ function Home() {
                     </Grid>
                     <Grid item xs={12} md={9} padding={'16px'}>
                         <Box sx={{ backgroundColor: '#181818', marginBottom: '16px', borderRadius: 2, p: 2, boxShadow: 6 }}>
-                            <Box sx={{ display: 'flex' }}>
+                            <Grid item sx={{ display: 'flex' }}>
                                 <Avatar sx={{ marginTop: '8px' }} src={userProfile.photo} />
-                                <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: '24px', minWidth: '261px', width: '100%' }}>
-                                    <TextField
-                                        onChange={(e) => {
-                                            setBody(e.target.value);
-                                        }}
-                                        value={body}
-                                        multiline
-                                        placeholder="Share your thoughts.."
-                                        maxRows={4}
-                                        InputProps={{
-                                            sx: { borderRadius: '20px' }
-                                        }}
-                                        fullWidth
-                                    />
-                                    <Box
-                                        display='flex'
-                                        justifyContent='space-between'
-                                    >
-                                        <label htmlFor="file">
-                                            <Button component='span' variant="outlined" size="small" sx={{ marginTop: '8px', width: '100px', fontWeight: 'bold', borderRadius: '24px' }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7e57c2" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-image"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                                                    <span style={{ marginLeft: '4px' }}>Photo</span>
-                                                </Box>
-                                            </Button>
-                                        </label>
-
-                                        <input
-                                            accept="image/*"
-                                            style={{ display: 'none' }}
-                                            id="file"
-                                            type="file"
+                                <Grid container sx={{ display: 'flex', marginLeft: '24px' }}>
+                                    <Grid item xs={12} display={'flex'} alignItems={'center'}>
+                                        <TextField
                                             onChange={(e) => {
-                                                previewFile(e.target.files[0]);
-                                                setPostFile(e.target.files[0]);
+                                                setBody(e.target.value);
                                             }}
+                                            value={body}
+                                            multiline
+                                            placeholder="Share your thoughts.."
+                                            maxRows={4}
+                                            InputProps={{
+                                                sx: { borderRadius: '20px' }
+                                            }}
+                                            fullWidth
                                         />
+
+                                        <Box>
+                                            <label htmlFor="file">
+                                                <Button disableRipple component='span' size="small" sx={{
+                                                    '&:hover': { backgroundColor: 'inherit', color: 'inherit' }
+                                                }}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7e57c2" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-image"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                                </Button>
+                                            </label>
+                                            <input
+                                                accept="image/*"
+                                                style={{ display: 'none' }}
+                                                id="file"
+                                                type="file"
+                                                onChange={(e) => {
+                                                    previewFile(e.target.files[0]);
+                                                    setPostFile(e.target.files[0]);
+                                                }}
+                                            />
+                                        </Box>
+
+                                    </Grid>
+
+                                    <Grid item xs={1} alignSelf={'center'}>
+
+                                    </Grid>
+
+                                    <img id="postFile" src="" alt="" loading="lazy" style={{ width: '100%', height: 'auto', marginTop: '8px', borderRadius: '16px' }} />
+
+                                    <Grid item xs={12}>
                                         <LoadingButton
                                             disabled={!body && !postFile}
                                             loading={loading}
                                             onClick={handleShare}
                                             size="small"
                                             variant="contained"
-                                            sx={{ marginTop: '8px', width: '100px', borderRadius: '24px' }}
+                                            sx={{ marginTop: '8px', borderRadius: '24px' }}
+                                            fullWidth
                                         >
                                             Share
                                         </LoadingButton>
-                                    </Box>
-                                    <img id="postFile" src="" alt="" loading="lazy" style={{ width: '320px', height: 'auto', marginTop: '8px', borderRadius: '16px' }} />
-                                </Box>
-                            </Box>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
                         </Box>
                         <Grid container sx={{ backgroundColor: '#181818', borderRadius: 2, p: 2, gap: 1, boxShadow: 6 }}>
                             {

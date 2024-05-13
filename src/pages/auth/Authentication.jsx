@@ -202,19 +202,20 @@ function Authentication() {
         '& > :not(style)': {
             marginBottom: '12px',
         },
-        width: '480px'
+        minWidth: '320px',
+        maxWidth: '480px'
     };
 
     return (
         <Container maxWidth='lg'>
-            <Grid container spacing={8} padding={'8px'} minHeight='100vh'>
+            <Grid container spacing={8} padding={'16px'} minHeight='100vh'>
                 <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Grid sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-                        <Typography variant='h2' color='secondary' sx={{ position: 'absolute', marginLeft: '8px' }}><span style={{ color: '#f5f5f5' }}>Everybody</span> <strong>TALKS.</strong></Typography>
+                    <Grid sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', width: '100%' }}>
+                        <Typography variant='h2' color='secondary' sx={{ flexShrink: 1, position: 'absolute', marginLeft: '8px' }}><span style={{ color: '#f5f5f5' }}>Everybody</span> <strong>TALKS.</strong></Typography>
                         <img
                             src={'https://images.unsplash.com/photo-1528642474498-1af0c17fd8c3?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}
                             alt={'People'}
-                            style={{ minWidth: '445px', maxWidth: '100%', height: 'auto', borderRadius: 6 }}
+                            style={{ minWidth: '100%', height: 'auto', borderRadius: 6 }}
                         />
                     </Grid>
                 </Grid>
