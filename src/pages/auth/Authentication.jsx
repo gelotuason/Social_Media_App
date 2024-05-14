@@ -12,6 +12,7 @@ import Divider from '@mui/material/Divider';
 import Modal from '@mui/material/Modal';
 import Link from '@mui/material/Link';
 import LoadingButton from '@mui/lab/LoadingButton';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import dayjs from 'dayjs';
 import * as Yup from 'yup';
 
@@ -190,6 +191,8 @@ function Authentication() {
         }
     }
 
+    const isSmScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
+
     const style = {
         position: 'absolute',
         top: '50%',
@@ -211,7 +214,7 @@ function Authentication() {
             <Grid container spacing={8} padding={'16px'} minHeight='100vh'>
                 <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column' }}>
                     <Grid sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
-                        <Typography variant='h1' color='secondary'><span style={{ color: '#f5f5f5' }}>Everybody</span><br /> <strong>TALKS.</strong></Typography>
+                        <Typography variant={ isSmScreen ? 'h2' : 'h1' } color='secondary'><span style={{ color: '#f5f5f5' }}>Everybody</span><br /> <strong>TALKS.</strong></Typography>
                     </Grid>
                 </Grid>
                 <Grid item xs={12} md={6} display="flex" alignItems="center">
