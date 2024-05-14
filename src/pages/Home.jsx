@@ -172,10 +172,10 @@ function Home() {
                     </Grid>
                     <Grid item xs={12} md={9} padding={'16px'}>
                         <Box sx={{ backgroundColor: '#181818', marginBottom: '16px', borderRadius: 2, p: 2, boxShadow: 6 }}>
-                            <Grid item sx={{ display: 'flex' }}>
-                                <Avatar sx={{ marginTop: '8px' }} src={userProfile.photo} />
-                                <Grid container sx={{ display: 'flex', marginLeft: '24px' }}>
-                                    <Grid item xs={12} display={'flex'} alignItems={'center'}>
+                            <Grid item>
+                                <Grid container>
+                                    <Grid item xs={12} display={'flex'} alignItems={'center'} gap={1}>
+                                        <Avatar sx={{marginRight: '8px', display: { xs: 'none', md: 'block' } }} src={userProfile.photo} />
                                         <TextField
                                             onChange={(e) => {
                                                 setBody(e.target.value);
@@ -209,30 +209,21 @@ function Home() {
                                                 }}
                                             />
                                         </Box>
-
-                                    </Grid>
-
-                                    <Grid item xs={1} alignSelf={'center'}>
-
-                                    </Grid>
-
-                                    <img id="postFile" src="" alt="" loading="lazy" style={{ width: '100%', height: 'auto', marginTop: '8px', borderRadius: '16px' }} />
-
-                                    <Grid item xs={12}>
-                                        <LoadingButton
-                                            disabled={!body && !postFile}
-                                            loading={loading}
-                                            onClick={handleShare}
-                                            size="small"
-                                            variant="contained"
-                                            sx={{ marginTop: '8px', borderRadius: '24px' }}
-                                            fullWidth
-                                        >
-                                            Share
-                                        </LoadingButton>
                                     </Grid>
                                 </Grid>
                             </Grid>
+                            <img id="postFile" src="" alt="" loading="lazy" style={{ width: '100%', height: 'auto', marginTop: '8px', borderRadius: '16px' }} />
+                            <LoadingButton
+                                disabled={!body && !postFile}
+                                loading={loading}
+                                onClick={handleShare}
+                                size="small"
+                                variant="contained"
+                                sx={{ marginTop: '8px', borderRadius: '24px' }}
+                                fullWidth
+                            >
+                                Share
+                            </LoadingButton>
                         </Box>
                         <Grid container sx={{ backgroundColor: '#181818', borderRadius: 2, p: 2, gap: 1, boxShadow: 6 }}>
                             {
