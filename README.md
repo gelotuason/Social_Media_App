@@ -8,7 +8,7 @@ An early-stage web-based social media platform with a plans to expand and add mo
 - Yup
 
 ## Current features
-- Interactivity: can post text and image, and change profile picture
+- User interactivity: can post text and image, and change profile picture
 - Database: utilized Firebase Cloud Firestore for saving post data
 - Storage: used Firebase Cloud Storage for storing media files
 - User interface: minimalist and user-friendly design created with Material-UI
