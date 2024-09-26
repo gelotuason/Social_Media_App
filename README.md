@@ -1,8 +1,23 @@
-# React + Vite
+## Brief summary
+An early-stage web-based social media platform with a plans to expand and add more features, developed for learning purposes.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Built with
+- React
+- Material-UI
+- Firebase
+- Yup
 
-Currently, two official plugins are available:
+## Current features
+- Interactivity: can post text and image, and change profile picture
+- Database: utilized Firebase Cloud Firestore for saving post data
+- Storage: used Firebase Cloud Storage for storing media files
+- User interface: minimalist and user-friendly design created with Material-UI
+- Form validation: incorporated Yup library to provide a robust user input validation system
+- Authentication: implemented using Firebase Authentication
+  - secure login and registration
+  - automatic session management
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Todos
+- Deletion of post
+- Real-time chat system
+- Profile page
